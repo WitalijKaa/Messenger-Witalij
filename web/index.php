@@ -7,4 +7,3 @@ require(__DIR__ . '/../vendor/autoload/Autoloader.php');
 require(__DIR__ . '/../vendor/software/Wii.php');
 
 (new wii\App())->run();
-(new view\TempView())->tempEcho();

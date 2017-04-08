@@ -5,6 +5,7 @@ namespace wii;
 class App {
 
     public function run() {
-        echo '<h1>мессенджер Витаха</h1>';
+        $cntl = new Controller();
+        $cntl->doAction();
     }
 }
