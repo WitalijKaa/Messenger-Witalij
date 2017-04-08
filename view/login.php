@@ -11,7 +11,8 @@
 
 <div class="container">
     <h1>мессенджер Витахи I</h1>
-    <a href="/login">Login</a>
+    <h2>страница Логина</h2>
+    <a href="/">Home</a>
 </div>
 
 </body>

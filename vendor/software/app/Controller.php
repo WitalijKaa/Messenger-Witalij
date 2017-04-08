@@ -6,16 +6,24 @@ class Controller {
 
     const VIEW_PATH = APP_PATH . 'view/';
 
-    private static $cntlNamespace = 'controllers';
-    private static $cntlName = 'Main';
+    private $cntlNamespace = 'controllers';
+    private $cntlName = 'Main';
 
-    protected static $defaultActionName = 'index';
+    protected $actionName = 'index';
+
+    public function __construct($config = []) {
+        if (array_key_exists('action', $config)) {
+            $this->actionName = $config['action'];
+        }
+    }
 
     public function doAction() {
-        $controllerName = static::$cntlNamespace . '\\' . static::$cntlName . 'Controller';
-        $actionName = 'action' . ucfirst(static::$defaultActionName);
+        $controllerName = $this->cntlNamespace . '\\' . $this->cntlName . 'Controller';
 
-        $cntl = new $controllerName();
+        $urlConfig = (new PrettyUrl())->getUrlConfig();
+
+        $cntl = new $controllerName($urlConfig);
+        $actionName = 'action' . ucfirst($cntl->actionName);
         $cntl->$actionName();
     }
 
