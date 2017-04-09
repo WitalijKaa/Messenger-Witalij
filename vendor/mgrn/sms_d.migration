@@ -1,0 +1,9 @@
+<?php return "CREATE TABLE sms_dialog (
+
+sms_id bigint PRIMARY KEY,
+msg text NOT NULL DEFAULT '',
+person_id integer NOT NULL REFERENCES person (person_id),
+dialog_id integer NOT NULL REFERENCES dialog (dialog_id),
+create_time timestamp DEFAULT current_timestamp,
+hidden boolean DEFAULT false
+);";

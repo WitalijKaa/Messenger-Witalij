@@ -1,0 +1,5 @@
+<?php return 'CREATE TABLE dialog_to_member (
+
+dialog_id integer NOT NULL REFERENCES dialog (dialog_id),
+person_id integer NOT NULL REFERENCES person (person_id)
+);';

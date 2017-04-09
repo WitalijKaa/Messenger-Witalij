@@ -1,0 +1,8 @@
+<?php return 'CREATE TABLE person (
+
+person_id integer PRIMARY KEY,
+login text NOT NULL UNIQUE,
+msg_login text NOT NULL,
+tech_login text NOT NULL UNIQUE,
+pass text NOT NULL
+);';

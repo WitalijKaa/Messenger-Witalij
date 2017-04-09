@@ -1,0 +1,8 @@
+<?php return 'CREATE TABLE dialog (
+
+dialog_id integer PRIMARY KEY,
+name text NOT NULL,
+person_id integer NOT NULL REFERENCES person (person_id),
+tech_login text NOT NULL UNIQUE,
+deleted boolean NOT NULL DEFAULT false
+);';

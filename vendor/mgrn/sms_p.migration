@@ -1,0 +1,10 @@
+<?php return "CREATE TABLE sms_private (
+
+sms_id bigint PRIMARY KEY,
+msg text NOT NULL DEFAULT '',
+person_id integer NOT NULL REFERENCES person (person_id),
+person_to_id integer NOT NULL REFERENCES person (person_id),
+create_time timestamp DEFAULT current_timestamp,
+hidden boolean DEFAULT false,
+CONSTRAINT real_msg CHECK (person_id != person_to_id)
+);";
