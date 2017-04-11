@@ -27,7 +27,12 @@ class Controller {
         $cntl->$actionName();
     }
 
-    protected function render($viewName) {
+    protected function render($viewName, $viewAttrs = []) {
+        foreach ($viewAttrs as $attrKey => $attrVal) {
+            global $$attrKey;
+            $$attrKey = $attrVal;
+        }
+
         require self::VIEW_PATH . $viewName . '.php';
     }
 }

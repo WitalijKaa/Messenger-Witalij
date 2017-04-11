@@ -7,7 +7,7 @@ use wii\model\ActiveRecord;
 class Person extends ActiveRecord {
 
     public function tempEcho() {
-        var_dump($this->attrsGetAllAsArr());
+        return $this->attrsGetAllAsArr();
     }
 
     protected function attrsRules()

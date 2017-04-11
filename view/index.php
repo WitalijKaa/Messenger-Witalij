@@ -1,4 +1,6 @@
-<?php ?>
+<?php
+/* @var $temp array */
+?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -13,6 +15,7 @@
     <h1>мессенджер Витахи I</h1>
     <a href="/login">Login</a>
 </div>
+<?php var_dump($temp) ?>
 
 </body>
 </html>
