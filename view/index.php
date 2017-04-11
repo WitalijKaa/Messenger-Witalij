@@ -15,7 +15,9 @@
     <h1>мессенджер Витахи I</h1>
     <a href="/login">Login</a>
 </div>
-<?php var_dump($temp) ?>
+<?php var_dump($temp['kv']) ?><br>
+<?php var_dump($temp['dc']) ?><br>
+<?php var_dump($temp['t']) ?><br>
 
 </body>
 </html>

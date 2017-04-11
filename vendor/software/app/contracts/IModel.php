@@ -4,5 +4,5 @@ namespace wii\contracts;
 
 interface IModel {
 
-    public function attrsGetAllAsArr();
+    public function attrsGetListArr();
 }
