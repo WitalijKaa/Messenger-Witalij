@@ -20,8 +20,6 @@ class Person extends ActiveRecord {
         $this->login = 'PHPcoder';
         $this->person_id = '555';
         $arr['kv'] = $this->attrsGetKeyValArr();
-        $arr['dc'] = $this->attrsGetDirtyClean();
-        $arr['t'] = $this->attrsGetTypes();
 
         return $arr;
     }

@@ -52,6 +52,11 @@ abstract class Model implements IModel {
         if (false === $this->_attrsAllList) { $this->attrsGetListArr(); }
         return $this->_attrsTypes;
     }
+    public function attrGetType($name) {
+        $aTypes = $this->attrsGetTypes();
+        if (array_key_exists($name, $aTypes)) { return $aTypes[$name]; }
+        return 'string'; // todo здесь по-хорошему нужно бросать исключение
+    }
 
     /** @var array */
     private $_attrsKeyVal = false;
@@ -102,7 +107,7 @@ abstract class Model implements IModel {
 
     /** @var array */
     private $_attrsDirtyCleanArr = false;
-    protected function attrsGetDirtyClean() {
+    private function attrsGetDirtyClean() {
         if (false === $this->_attrsDirtyCleanArr) {
             $allAttrs = $this->attrsGetListArr();
             $this->_attrsDirtyCleanArr = [];
@@ -112,9 +117,15 @@ abstract class Model implements IModel {
         }
         return $this->_attrsDirtyCleanArr;
     }
-    protected function attrsSetDirty($name) {
+    private function attrsSetDirty($name) {
         if (false === $this->_attrsDirtyCleanArr) { $this->attrsGetDirtyClean(); }
         $this->_attrsDirtyCleanArr[$name] = true;
+    }
+    public function isAttrDirty($name) {
+        if ($this->_attrsDirtyCleanArr) {
+            return !!$this->_attrsDirtyCleanArr[$name];
+        }
+        return false;
     }
 
     protected function attrsRules() { return []; }
