@@ -85,18 +85,19 @@ abstract class Model implements IModel {
     }
 
     private function setAttrTranformingType($name, $value) {
-        $attrsTypes = $this->attrsGetTypes(); // нельзя удалять, так как этот метод конроллирует созданием массива $this->_attrsKeyVal
-        $this->attrsGetDirtyClean();
-        if ('string' == $attrsTypes[$name]) {
-            $this->_attrsKeyVal[$name] = (string)$value;
+        $aTypes = $this->attrsGetTypes(); // нельзя удалять, так как $this->attrsGetTypes() конроллирует созданием массива $this->_attrsKeyVal
+        $attrs = &$this->_attrsKeyVal;
+
+        if ('string' == $aTypes[$name]) {
+            $attrs[$name] = (string)$value;
         }
-        else if ('integer' == $attrsTypes[$name]) {
-            $this->_attrsKeyVal[$name] = (integer)$value;
+        else if ('integer' == $aTypes[$name]) {
+            $attrs[$name] = (integer)$value;
         }
-        else if ('boolean' == $attrsTypes[$name]) {
-            $this->_attrsKeyVal[$name] = (boolean)$value;
+        else if ('boolean' == $aTypes[$name]) {
+            $attrs[$name] = (boolean)$value;
         }
-        $this->_attrsDirtyCleanArr[$name] = true;
+        $this->attrsSetDirty($name);
     }
 
     /** @var array */
@@ -110,6 +111,10 @@ abstract class Model implements IModel {
             }
         }
         return $this->_attrsDirtyCleanArr;
+    }
+    protected function attrsSetDirty($name) {
+        if (false === $this->_attrsDirtyCleanArr) { $this->attrsGetDirtyClean(); }
+        $this->_attrsDirtyCleanArr[$name] = true;
     }
 
     protected function attrsRules() { return []; }
