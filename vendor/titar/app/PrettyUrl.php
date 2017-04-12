@@ -1,6 +1,6 @@
 <?php
 
-namespace wii;
+namespace ww;
 
 class PrettyUrl {
 

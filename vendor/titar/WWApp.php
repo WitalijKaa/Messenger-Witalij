@@ -1,8 +1,8 @@
 <?php
 
-namespace wii;
+namespace ww;
 
-class WiiApp {
+class WWApp {
 
     public static $db;
 }

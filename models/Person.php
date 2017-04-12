@@ -2,7 +2,7 @@
 
 namespace models;
 
-use wii\model\ActiveRecord;
+use ww\model\ActiveRecord;
 
 /**
  * @property integer $person_id

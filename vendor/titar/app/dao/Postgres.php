@@ -1,6 +1,6 @@
 <?php
 
-namespace wii\dao;
+namespace ww\dao;
 
 class Postgres {
 
@@ -19,7 +19,7 @@ class Postgres {
         $checkTableQuery = 'SELECT * FROM "person" LIMIT 1';
 
         if (!$this->pdo->query($checkTableQuery)) {
-            $migrationsPath = APP_PATH . 'vendor/mgrn/';
+            $migrationsPath = WW_CODE_PATH . 'vendor/mgrn/';
 
             $tP = include $migrationsPath . 'person.migration';
             $tPSMS = include $migrationsPath . 'sms_p.migration';

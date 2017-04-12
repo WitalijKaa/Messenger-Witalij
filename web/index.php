@@ -1,9 +1,9 @@
 <?php
 
-const APP_PATH = __DIR__ . '/../';
-const WII_PATH = __DIR__ . '/../vendor/software/app/';
+const WW_CODE_PATH = __DIR__ . '/../';
+const WW_PATH = __DIR__ . '/../vendor/titar/app/';
 
-require(__DIR__ . '/../vendor/autoload/Autoloader.php');
-require(__DIR__ . '/../vendor/software/Wii.php');
+require(__DIR__ . '/../vendor/titar/autoload/AutoloaderOfClientCode.php');
+require(__DIR__ . '/../vendor/titar/WW.php');
 
-(new wii\App())->run();
+(new ww\App())->run();

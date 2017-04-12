@@ -1,8 +1,8 @@
 <?php
 
-namespace wii;
+namespace ww;
 
-use wii\contracts\IQueryBuilder;
+use ww\contracts\IQueryBuilder;
 
 class QueryBuilder implements IQueryBuilder {
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace wii\contracts;
+namespace ww\contracts;
 
 interface IActiveRecord {
 

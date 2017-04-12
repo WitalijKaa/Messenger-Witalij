@@ -3,7 +3,7 @@
 namespace controllers;
 
 use models\Person;
-use wii\Controller;
+use ww\Controller;
 
 class MainController extends Controller {
 

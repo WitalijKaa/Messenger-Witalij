@@ -1,8 +1,8 @@
 <?php
 
-namespace wii\model;
+namespace ww\model;
 
-use wii\contracts\IModel;
+use ww\contracts\IModel;
 
 abstract class Model implements IModel {
 

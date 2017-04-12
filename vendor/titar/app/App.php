@@ -1,11 +1,11 @@
 <?php
 
-namespace wii;
+namespace ww;
 
 class App {
 
     public function run() {
-        \Wii::$db = new dao\Postgres();
+        \WW::$db = new dao\Postgres();
 
         $cntl = new Controller();
         $cntl->doAction();

@@ -1,10 +1,10 @@
 <?php
 
-namespace wii;
+namespace ww;
 
 class Controller {
 
-    const VIEW_PATH = APP_PATH . 'view/';
+    const VIEW_PATH = WW_CODE_PATH . 'view/';
 
     private $cntlNamespace = 'controllers';
     private $cntlName = 'Main';
