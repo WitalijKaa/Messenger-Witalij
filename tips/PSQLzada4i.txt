@@ -1,0 +1,191 @@
+SELECT b.book_date AS date, t.passenger_name AS name FROM flights f
+INNER JOIN (SELECT flight_id, ticket_no, seat_no FROM boarding_passes WHERE seat_no = '1A') bp ON bp.flight_id = f.flight_id
+INNER JOIN tickets t ON t.ticket_no = bp.ticket_no
+INNER JOIN bookings b ON t.book_ref = b.book_ref
+WHERE f.departure_airport = 'SVO' AND f.arrival_airport = 'OVB'
+AND f.scheduled_departure::date = bookings.now()::date - INTERVAL '2 day'
+
+SELECT COUNT(*) FROM flights f
+INNER JOIN seats s ON s.aircraft_code = f.aircraft_code
+WHERE f.flight_no = 'PG0404' AND f.scheduled_departure::date = bookings.now()::date - INTERVAL '1 day'
+AND NOT EXISTS (SELECT NULL FROM boarding_passes bp WHERE bp.flight_id = f.flight_id AND bp.seat_no = s.seat_no)
+
+SELECT f.flight_no, a_from.city || ' (' || a_from.airport_name || ')' AS departure, a_to.city || ' (' || a_to.airport_name || ')' AS arrival,
+f.scheduled_departure, f.actual_departure - f.scheduled_departure AS the_delay FROM flights f
+LEFT JOIN airports a_from ON f.departure_airport = a_from.airport_code
+LEFT JOIN airports a_to ON f.arrival_airport = a_to.airport_code
+WHERE f.actual_departure IS NOT NULL
+ORDER BY f.actual_departure - f.scheduled_departure DESC
+LIMIT 20
+
+SELECT f.flight_no, f.scheduled_duration, min(f.actual_duration) minimum, max(f.actual_duration) maximum,
+sum(CASE WHEN f.actual_departure > f.scheduled_departure + INTERVAL '1 hour' THEN 1 ELSE 0 END) delays
+FROM flights_v f
+WHERE f.departure_city = 'Москва' AND f.arrival_city = 'Санкт-Петербург' AND f.status = 'Arrived'
+GROUP BY f.flight_no, f.scheduled_duration
+
+>>>>
+SELECT t.passenger_name, t.ticket_no, count(*) the_flights FROM tickets t
+INNER JOIN (SELECT ticket_no FROM boarding_passes WHERE boarding_no = 1) bp ON t.ticket_no = bp.ticket_no
+GROUP BY t.passenger_name, t.ticket_no HAVING count(*) > 1
+ORDER BY t.passenger_name
+
+SELECT t.passenger_name, t.ticket_no, count(*) the_flights FROM tickets t
+INNER JOIN boarding_passes bp ON t.ticket_no = bp.ticket_no
+GROUP BY t.passenger_name, t.ticket_no HAVING max(bp.boarding_no) = 1 AND count(*) > 1
+ORDER BY t.passenger_name !!!! НЕВЕРНОЕ РЕШЕНИЕ ИЗ КНИГИ !!!!
+
+SELECT * FROM tickets t
+INNER JOIN boarding_passes bp ON t.ticket_no = bp.ticket_no
+WHERE t.passenger_name = 'ZOYA MATVEEVA'
+<<<<
+
+SELECT max(t.people), min(t.people) FROM (SELECT count(*) people FROM tickets GROUP BY book_ref) t
+
+SELECT tf.ticket_no, t_last.book_date, t_last.passenger_name, tf.fare_conditions,
+a_from.city || ' (' || a_from.airport_name || ')' AS departure, a_to.city || ' (' || a_to.airport_name || ')' AS arrival,
+lead(f.scheduled_departure) OVER w AS next_departure,
+lead(f.scheduled_departure) OVER w - f.scheduled_arrival AS time_to_wait
+FROM ticket_flights tf
+INNER JOIN
+(SELECT t.ticket_no, b.book_date, t.passenger_name FROM tickets t
+INNER JOIN bookings b ON b.book_ref = t.book_ref
+WHERE b.book_date > bookings.now() - INTERVAL '1 hour')
+t_last ON tf.ticket_no = t_last.ticket_no
+INNER JOIN flights f ON f.flight_id = tf.flight_id
+LEFT JOIN airports a_from ON f.departure_airport = a_from.airport_code
+LEFT JOIN airports a_to ON f.arrival_airport = a_to.airport_code
+WINDOW w AS (PARTITION BY tf.ticket_no ORDER BY f.scheduled_departure)
+ORDER BY tf.ticket_no, f.scheduled_departure
+
+>>>>
+WITH t_ord AS (SELECT t.ticket_no, t.passenger_name, f.scheduled_departure,
+a_from.city || ' (' || a_from.airport_name || ')' AS departure, a_to.city || ' (' || a_to.airport_name || ')' AS arrival,
+f.departure_airport, f.arrival_airport
+FROM ticket_flights tf
+INNER JOIN
+(SELECT tt.ticket_no, tt.passenger_name FROM tickets tt
+INNER JOIN bookings b ON b.book_ref = tt.book_ref
+WHERE b.book_date > bookings.now() - INTERVAL '1 hour')
+t ON tf.ticket_no = t.ticket_no
+INNER JOIN flights f ON f.flight_id = tf.flight_id
+LEFT JOIN airports a_from ON f.departure_airport = a_from.airport_code
+LEFT JOIN airports a_to ON f.arrival_airport = a_to.airport_code
+ORDER BY t.ticket_no, f.scheduled_departure)
+SELECT ttt.ticket_no, ttt.passenger_name,
+(CASE WHEN ttt.first_air = ttt.last_air THEN 'yes' ELSE 'no' END) AS is_two_ways,
+ttt.first_air, (CASE WHEN ttt.first_air != ttt.last_air THEN ttt.last_air ELSE '' END) AS the_last_air
+FROM
+(SELECT t_ord.ticket_no, t_ord.passenger_name, t_ord.departure, t_ord.arrival,
+first_value(t_ord.departure) OVER w AS first_air,
+last_value(t_ord.arrival) OVER w AS last_air
+FROM t_ord
+WINDOW w AS (PARTITION BY t_ord.ticket_no)
+ORDER BY t_ord.ticket_no, t_ord.scheduled_departure) ttt
+GROUP BY ttt.ticket_no, ttt.passenger_name, ttt.first_air, ttt.last_air
+ORDER BY ttt.ticket_no
+
+SELECT t.ticket_no,
+array_agg(f.departure_airport ORDER BY f.scheduled_departure) || (array_agg (f.arrival_airport ORDER BY f.scheduled_departure DESC))[1] AS arr_air
+FROM tickets t
+JOIN ticket_flights tf ON tf.ticket_no = t.ticket_no
+JOIN flights f ON f.flight_id = tf.flight_id
+GROUP BY t.ticket_no
+LIMIT 50
+
+WITH air_array AS
+(SELECT t.ticket_no, t.passenger_name,
+	an_from.the_airport AS airport_from, an_last.the_airport AS airport_last, an_middle.the_airport AS airport_middle, 
+	cardinality(arr_air) AS air_count,
+	arr_air[1] AS air_from,
+	arr_air[cardinality(arr_air)] AS air_last,
+	arr_air[cardinality(arr_air) / 2 + 1] AS air_middle
+	FROM (SELECT t.ticket_no, t.passenger_name,
+		array_agg(f.departure_airport ORDER BY f.scheduled_departure)
+		|| (array_agg (f.arrival_airport ORDER BY f.scheduled_departure DESC))[1] AS arr_air
+		FROM tickets t
+		INNER JOIN ticket_flights tf ON tf.ticket_no = t.ticket_no
+		INNER JOIN flights f ON f.flight_id = tf.flight_id
+		INNER JOIN bookings b ON b.book_ref = t.book_ref
+		WHERE b.book_date > bookings.now() - INTERVAL '2 hour'
+		GROUP BY t.ticket_no, t.passenger_name
+	) t
+	INNER JOIN (SELECT airport_code, city || ' (' || airport_name || ')' AS the_airport FROM airports) an_from ON arr_air[1] = an_from.airport_code
+	INNER JOIN (SELECT airport_code, city || ' (' || airport_name || ')' AS the_airport FROM airports) an_last ON arr_air[cardinality(arr_air)] = an_last.airport_code
+	INNER JOIN (SELECT airport_code, city || ' (' || airport_name || ')' AS the_airport FROM airports) an_middle ON arr_air[cardinality(arr_air) / 2 + 1] = an_middle.airport_code
+)
+SELECT t.ticket_no, t.passenger_name, 
+(CASE WHEN aa.air_from = aa.air_last THEN 'one way' ELSE 'backs' END) AS is_two_ways,
+aa.airport_from, (CASE WHEN aa.air_from = aa.air_last THEN aa.airport_middle ELSE aa.airport_last END) AS airport_to
+FROM tickets t
+INNER JOIN air_array aa ON aa.ticket_no = t.ticket_no
+ORDER BY t.ticket_no
+<<<<
+
+WITH air_array AS
+(SELECT t.ticket_no, t.passenger_name, arr_air,
+	an_from.the_airport AS airport_from, an_last.the_airport AS airport_last, an_middle.the_airport AS airport_middle, 
+	cardinality(arr_air) AS air_count,
+	arr_air[1] AS air_from,
+	arr_air[cardinality(arr_air)] AS air_last,
+	arr_air[cardinality(arr_air) / 2 + 1] AS air_middle
+	FROM (SELECT t.ticket_no, t.passenger_name,
+		array_agg(f.departure_airport ORDER BY f.scheduled_departure)
+		|| (array_agg (f.arrival_airport ORDER BY f.scheduled_departure DESC))[1] AS arr_air
+		FROM tickets t
+		INNER JOIN ticket_flights tf ON tf.ticket_no = t.ticket_no
+		INNER JOIN flights f ON f.flight_id = tf.flight_id
+		INNER JOIN bookings b ON b.book_ref = t.book_ref
+		WHERE b.book_date > bookings.now() - INTERVAL '2 hour'
+		GROUP BY t.ticket_no, t.passenger_name
+	) t
+	INNER JOIN (SELECT airport_code, city || ' (' || airport_name || ')' AS the_airport FROM airports) an_from ON arr_air[1] = an_from.airport_code
+	INNER JOIN (SELECT airport_code, city || ' (' || airport_name || ')' AS the_airport FROM airports) an_last ON arr_air[cardinality(arr_air)] = an_last.airport_code
+	INNER JOIN (SELECT airport_code, city || ' (' || airport_name || ')' AS the_airport FROM airports) an_middle ON arr_air[cardinality(arr_air) / 2 + 1] = an_middle.airport_code
+)
+SELECT t.ticket_no, t.passenger_name, aa.arr_air,
+(CASE WHEN aa.air_count = 5 THEN
+	(CASE WHEN aa.arr_air[2] = aa.arr_air[cardinality(aa.arr_air) - 1] THEN 'simetric' ELSE 'NOT simetric' END)
+ELSE 
+	(CASE WHEN aa.air_count > 6 THEN 
+		(CASE WHEN aa.arr_air[2] = aa.arr_air[cardinality(aa.arr_air) - 1] AND aa.arr_air[3] = aa.arr_air[cardinality(aa.arr_air) - 2] THEN 'simetric (7)' ELSE 'NOT simetric (7)' END) 
+	ELSE 'short' END) 
+END) AS is_simetric,
+aa.airport_from, aa.airport_middle AS airport_to
+FROM tickets t
+INNER JOIN air_array aa ON aa.ticket_no = t.ticket_no
+WHERE aa.air_from = aa.air_last
+ORDER BY t.ticket_no
+
+CREATE VIEW aircrafts_seats_capacity AS
+SELECT a.aircraft_code, a.model,
+(SELECT count(*) FROM seats s WHERE s.aircraft_code = a.aircraft_code) AS seats_count FROM aircrafts a
+
+WITH airsc AS (SELECT a.aircraft_code, a.model, (SELECT count(*) FROM seats s WHERE s.aircraft_code = a.aircraft_code) AS seats_count FROM aircrafts a),
+some_other AS (SELECT max(t.people), min(t.people) FROM (SELECT count(*) people FROM tickets GROUP BY book_ref) t)
+SELECT * FROM airsc, some_other, aircrafts
+
+CREATE TYPE wk_enum AS ENUM ('created', 'managing', 'received');
+
+
+SELECT * FROM tickets t
+INNER JOIN ticket_flights tf ON tf.ticket_no = t.ticket_no
+INNER JOIN flights f ON f.flight_id = tf.flight_id
+WHERE t.ticket_no = '0005435732698'
+ORDER BY f.scheduled_departure
+
+SELECT count(t.passenger_name), sum(b.total_amount) FILTER (WHERE b.total_amount > 200000), t.passenger_name
+FROM tickets t
+INNER JOIN (SELECT b.book_ref, b.total_amount FROM bookings b WHERE b.book_date > bookings.now() - INTERVAL '4 day') b ON b.book_ref = t.book_ref
+GROUP BY t.passenger_name
+HAVING count(t.passenger_name) > 50
+
+SELECT model, (SELECT count(seat_no) FROM seats s WHERE s.aircraft_code = a.aircraft_code) FROM aircrafts a
+-- OR
+SELECT a.model, count(*) FROM aircrafts a
+INNER JOIN seats s ON s.aircraft_code = a.aircraft_code
+GROUP BY a.model
+
+SELECT ARRAY (SELECT model FROM aircrafts a)
+
+

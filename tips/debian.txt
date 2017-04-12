@@ -1,0 +1,139 @@
+<pre>
+
+// apt-get remove --purge appName
+// rm -rf dirName
+
+df
+adduser wk
+
+su
+apt-get update
+apt-get install nano
+dpkg-reconfigure locales
+146
+dpkg-reconfigure tzdata
+locale
+locale -a
+shutdown -r now
+
+su
+cd /
+apt-get install ca-certificates
+nano /etc/apt/sources.list
+
+# official
+deb http://ftp.ru.debian.org/debian/ jessie main
+deb-src http://ftp.ru.debian.org/debian/ jessie main
+deb http://security.debian.org/ jessie/updates main
+deb-src http://security.debian.org/ jessie/updates main
+deb http://ftp.ru.debian.org/debian/ jessie-updates main
+deb-src http://ftp.ru.debian.org/debian/ jessie-updates main
+
+# Witalij Kaa
+deb http://packages.dotdeb.org jessie all
+deb-src http://packages.dotdeb.org jessie all
+
+
+wget https://www.dotdeb.org/dotdeb.gpg
+apt-key add dotdeb.gpg
+
+apt-get update
+apt-get upgrade
+shutdown -r now
+
+apt-get install man zip unzip git
+apt-get install apache2 apache2-mpm-itk
+apt-get install php7.0 libapache2-mod-php7.0 php7.0-mbstring php7.0-curl php7.0-dom postgresql-9.4 php7.0-pgsql
+shutdown -r now
+
+su
+cd /var/www
+ls
+mkdir temp
+cp /etc/apache2/sites-available/000-default.conf /var/www/temp/defaultApacheConf.txt
+cd temp
+php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+может быть проверку на хеш?
+php -r "if (hash_file('SHA384', 'composer-setup.php') === 'e115a8dc7871f15d853148a7fbac7da27d6c0030b848d9b3dc09e2a0388afed865e6a3d6b3c0fad45c48e2b5fc1196ae') { echo 'Hash is nice'; } else { echo 'Hash ooops'; } echo PHP_EOL;"
+php composer-setup.php
+ls
+cp composer.phar /usr/local/bin/composer
+
+cd ..
+mkdir forest
+chown wk:wk forest
+exit
+composer global require "fxp/composer-asset-plugin:^1.2.0"
+cd /var/www
+git clone https://WitalijKaa@bitbucket.org/WitalijKaa/wkforest.git forest
+cd forest
+composer install
+ls vendor
+mkdir web/assets
+mkdir rbac
+php yii wkforest/homo-hub wk qwer Witalij Titarenko Sergeevi4 Generalnij,Director 89099958579 witalijkaa@hotmail.com 1985-11-04
+php yii wkforest/homo-hub anna qwer Anna Titarenko Vasilievna Creativnij,Director 89652946820 egorkina.anyuta@yandex.ru 1992-09-11
+
+su
+su postgres
+psql -c "ALTER ROLE postgres WITH PASSWORD 'localpass';"
+psql -c "CREATE DATABASE wkforest WITH OWNER = postgres ENCODING = 'UTF8'"
+history -c
+exit
+
+nano /etc/apache2/sites-available/000-default.conf
+очистить содержимое
+
+nano /etc/apache2/sites-available/forest.conf
+
+<VirtualHost 62.109.1.160:80>
+    ServerName witalijkaa.fvds.ru
+    ServerAlias www.witalijkaa.fvds.ru
+    DocumentRoot /var/www/forest/web
+    CustomLog /var/www/apache/log/forest/custom.log combined
+    ErrorLog /var/www/apache/log/forest/error.log
+    AssignUserID wk wk
+    <Directory /var/www/forest/web>
+        RewriteEngine on
+        RewriteCond %{REQUEST_FILENAME} !-f
+        RewriteCond %{REQUEST_FILENAME} !-d
+        RewriteRule . index.php
+    </Directory>
+</VirtualHost>
+
+cd /var/www
+mkdir apache
+chown wk:wk apache
+exit
+cd /var/www/apache
+mkdir log
+cd log
+mkdir forest
+su
+a2ensite forest
+a2enmod rewrite
+service apache2 restart
+
+find / -name php.ini
+nano всех сделать error_reporting = E_ERROR
+shutdown -r now
+
+cd /var/www/forest
+скопировать images-up и temp миграцию
+php yii migrate
+php yii wkforest/auth-rules-reset
+
+su
+nano /etc/ssh/sshd_config
+присвоить
+PermitRootLogin no
+service sshd reload
+
+// права доступа все же менять не нужно
+su
+cd /var/www
+chmod =755 -R forest
+ls -l forest
+exit
+
+</pre>

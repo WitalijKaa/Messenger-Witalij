@@ -1,0 +1,51 @@
+OpenServer
+
+chcp 1251
+
+psql -U postgres -w
+
+\? справка
+\h [команда] справка по запросам
+\q выход
+\g ЗАПРОС; выполнить sql запрос
+
+\l список БД
+\db список табл пространств
+
+\c wkforest подключиться к БД
+\dt список таблиц
+\dt+ список таблиц с доп инф
+\df список фун-й
+
+\o [файл] переключить вывод из консоли в файл (и обратно) (здесь полезно юзать форматирование)
+
+
+CREATE TEMPORARY TABLE temp (LIKE some); создание временной таблицы с жизненным циклом на уровне сеанса
+CREATE INDEX i_name ON table(field);
+CREATE MATERIALIZED VIEW t_by_status AS SELECT status, SUM(money) FROM table_name GROUP_BY status;
+REFRESH MATERIALIZED VIEW t_by_status; нужно при обращении так как в отличии от обычного представления метериализованное высчитывается один раз во время создания
+
+пример функции + тригера
+ф-я
+CREATE FUNCTION set_last_update() RETURNS TRIGGER AS $$
+begin
+  new.field_name := current_timestamp;
+  return new;
+end;
+&& LANGUAGE plpgsql;
+триг
+CREATE TRIGGET table_last_update
+  BEFORE UPDATE OR INSERT ON table_name
+  FOR EACH ROW
+  EXECUTE PROCEDURE set_last_update();
+
+допустим мы создали таблицу, из нее унаследовали INHERITS еще 2 таблицы, и создали тригеры чтобы в 1 дочернюю ложились записи с полем status равным ground, а во 2 равным sea. то есть создали 2 секции. так вот при выборке  WHERE status='ground' все равно будут просмотрены все записи родительской таблицы (обе секции). но если мы
+ALTER TABLE t_name_ground ADD CONSTRAINT PARTITION_CHECK CHECK (status='groung')
+и соответсвенно для sea, то теперь если мы
+SELECT COUNT(*) FROM parent_table_name WHERE status='ground'
+будет вестить работа только с необходимой секцией (благодаря оптимизатору)
+
+CREATE ROLE wkaa LOGIN здесь есть куда доп параметров типа SUPERUSER CREATEROLE
+GRANT group_name TO wkaa
+REVOKE group_name FROM wkaa также есть ALTER ROLE и DROP ROLE
+
