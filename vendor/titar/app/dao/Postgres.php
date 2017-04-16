@@ -11,7 +11,7 @@ class Postgres {
     private $dbName = 'wii';
 
     public function __construct() {
-        $this->pdo = new \PDO('pgsql:host=localhost;dbname=' . $this->dbName, 'postgres', '');
+        $this->pdo = new \PDO('pgsql:host=localhost;dbname=' . $this->dbName, 'postgres', 'localpass');
         $this->createTablesIfNotExists();
     }
 
